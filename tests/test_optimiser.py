@@ -6,12 +6,20 @@
 """Test mlbox.optimisation.optimiser module."""
 import pytest
 import numpy as np
+import shutil
 
 from mlbox.optimisation.optimiser import Optimiser
 from mlbox.preprocessing.drift_thresholder import Drift_thresholder
 from mlbox.preprocessing.reader import Reader
 from mlbox.optimisation import make_scorer
 
+
+@pytest.fixture
+def setup_for_mlflow():
+    try:
+        shutil.rmtree('./mlruns')
+    except:
+        pass
 
 def test_init_optimiser():
     """Test init method of Optimiser class."""
@@ -159,7 +167,7 @@ def test_evaluate_and_optimise_classification():
     best = opt.optimise(space, dict, 1)
     assert type(best) == type(dict)
 
-def test_evaluate_and_optimise_classification_with_mlflow():
+def test_evaluate_and_optimise_classification_with_mlflow(setup_for_mlflow):
     """Test evaluate_and_optimise method of Optimiser class."""
     reader = Reader(sep=",")
 
@@ -193,8 +201,8 @@ def test_evaluate_and_optimise_classification_with_mlflow():
 
              }
 
-    mflow_parms = {'tracking_uri' : './mlruns2',
+    mflow_parms = {'tracking_uri' : './mlruns',
                    'experiment_name' : 'mlfow_experiment_name'}
 
-    best = opt.optimise(space, dict, 3, mlflow_parms = mflow_parms)
+    best = opt.optimise(space, dict, 4, mlflow_parms = mflow_parms)
     assert type(best) == type(dict)

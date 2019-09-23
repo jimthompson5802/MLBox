@@ -70,6 +70,7 @@ class Optimiser():
         self.random_state = random_state
         self.to_path = to_path
         self.verbose = verbose
+        self.mlflow_active = False
 
         warnings.warn("Optimiser will save all your fitted models into directory '"
                       +str(self.to_path)+"/joblib'. Please clear it regularly.")
@@ -95,7 +96,7 @@ class Optimiser():
                 setattr(self, k, v)
 
 
-    def evaluate(self, params, df, mlflow_parms = None):
+    def evaluate(self, params, df):
 
         """Evaluates the data.
 
@@ -127,10 +128,6 @@ class Optimiser():
 
             - "train": pandas DataFrame for the train set.
             - "target" : encoded pandas Serie for the target on train set (with dtype='float' for a regression or dtype='int' for a classification). Indexes should match the train set.
-
-        mlflow_parms : dict, default = None
-            - "tracking_uri": mflow tracking uri to for storing experiment/run data
-            - "experiment": mflow experiment name
 
         Returns
         -------
@@ -464,6 +461,10 @@ class Optimiser():
             print("CPU time: %s seconds" % (time.time() - start_time))
             print("")
 
+        if self.mlflow_active:
+            with mlflow.start_run(experiment_id = self.mlflow_experiment_id):
+                mlflow.log_metric(str(self.scoring), score)
+
         return score
 
     def optimise(self, space, df, max_evals=40, mlflow_parms=None):
@@ -532,7 +533,7 @@ class Optimiser():
         >>> best = opt.optimise(space, df, 3)
         """
 
-        hyperopt_objective = lambda params: -self.evaluate(params, df, mlflow_parms = mlflow_parms)
+        hyperopt_objective = lambda params: -self.evaluate(params, df)
 
         # Creating a correct space for hyperopt
 
@@ -582,7 +583,8 @@ class Optimiser():
 
                 if mlflow_parms is not None:
                     mlflow.set_tracking_uri(mlflow_parms['tracking_uri'])
-                    self.mlflow_experiment_id = experiment_id = mlflow.set_experiment(mlflow_parms['experiment_name'])
+                    self.mlflow_experiment_id = mlflow.set_experiment(mlflow_parms['experiment_name'])
+                    self.mlflow_active = True
 
                 best_params = fmin(hyperopt_objective,
                                    space=hyper_space,
