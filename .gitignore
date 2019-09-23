@@ -108,3 +108,6 @@ ENV/
 
 # save folders
 *save/
+
+# mflow tracking directory for testing
+mlruns
