@@ -10,3 +10,4 @@ tensorflow==1.14.0
 lightgbm==2.2.3
 tables==3.5.2
 xlrd==1.2.0
+mlflow==1.2.0

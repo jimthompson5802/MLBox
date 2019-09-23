@@ -11,6 +11,7 @@ from hyperopt import fmin, hp, tpe
 from sklearn.model_selection import cross_val_score, KFold, StratifiedKFold
 from sklearn.pipeline import Pipeline
 from sklearn.metrics import SCORERS, make_scorer, roc_auc_score
+import mlflow
 
 from ..encoding.na_encoder import NA_encoder
 from ..encoding.categorical_encoder import Categorical_encoder
@@ -94,7 +95,7 @@ class Optimiser():
                 setattr(self, k, v)
 
 
-    def evaluate(self, params, df):
+    def evaluate(self, params, df, mlflow_parms = None):
 
         """Evaluates the data.
 
@@ -126,6 +127,10 @@ class Optimiser():
 
             - "train": pandas DataFrame for the train set.
             - "target" : encoded pandas Serie for the target on train set (with dtype='float' for a regression or dtype='int' for a classification). Indexes should match the train set.
+
+        mlflow_parms : dict, default = None
+            - "tracking_uri": mflow tracking uri to for storing experiment/run data
+            - "experiment": mflow experiment name
 
         Returns
         -------
@@ -461,7 +466,7 @@ class Optimiser():
 
         return score
 
-    def optimise(self, space, df, max_evals=40):
+    def optimise(self, space, df, max_evals=40, mlflow_parms=None):
 
         """Optimises the Pipeline.
 
@@ -501,6 +506,11 @@ class Optimiser():
             Number of iterations.
             For an accurate optimal hyper-parameter, max_evals = 40.
 
+        mlflow_parms : dict, default = None
+            - "tracking_uri": mflow tracking uri to for storing experiment/run data
+            - "experiment": mflow experiment name
+
+
         Returns
         -------
         dict.
@@ -522,7 +532,7 @@ class Optimiser():
         >>> best = opt.optimise(space, df, 3)
         """
 
-        hyperopt_objective = lambda params: -self.evaluate(params, df)
+        hyperopt_objective = lambda params: -self.evaluate(params, df, mlflow_parms = mlflow_parms)
 
         # Creating a correct space for hyperopt
 
@@ -568,6 +578,11 @@ class Optimiser():
 
                         else:
                             hyper_space[p] = hp.choice(p, space[p]["space"])
+
+
+                if mlflow_parms is not None:
+                    mlflow.set_tracking_uri(mlflow_parms['tracking_uri'])
+                    self.mlflow_experiment_id = experiment_id = mlflow.set_experiment(mlflow_parms['experiment_name'])
 
                 best_params = fmin(hyperopt_objective,
                                    space=hyper_space,
