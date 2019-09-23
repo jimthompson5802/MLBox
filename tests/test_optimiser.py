@@ -7,6 +7,8 @@
 import pytest
 import numpy as np
 import shutil
+import os.path
+import os
 
 from mlbox.optimisation.optimiser import Optimiser
 from mlbox.preprocessing.drift_thresholder import Drift_thresholder
@@ -205,4 +207,9 @@ def test_evaluate_and_optimise_classification_with_mlflow(setup_for_mlflow):
                    'experiment_name' : 'mlfow_experiment_name'}
 
     best = opt.optimise(space, dict, 4, mlflow_parms = mflow_parms)
+    assert os.path.exists('./mlruns')
+    assert os.path.exists('./mlruns/1')
+    assert os.path.isfile('./mlruns/1/meta.yaml')
+    assert len(os.listdir('./mlruns/1')) == 5
+
     assert type(best) == type(dict)
