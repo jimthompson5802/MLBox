@@ -111,3 +111,4 @@ ENV/
 
 # mflow tracking directory for testing
 mlruns
+run_mlflow_ui.sh
