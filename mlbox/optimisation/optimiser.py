@@ -420,6 +420,15 @@ class Optimiser():
                 ))
                 print("")
 
+            if self.mlflow_active:
+                mlflow.start_run(experiment_id=self.mlflow_experiment_id)
+                mlflow.log_params(ne.get_params())
+                mlflow.log_param('cat_encoding', ce.strategy)
+                try:
+                    mlflow.log_params(fs.get_params())
+                except:
+                    pass
+
             try:
 
                 # Computing the mean cross validation score across the folds
@@ -462,8 +471,8 @@ class Optimiser():
             print("")
 
         if self.mlflow_active:
-            with mlflow.start_run(experiment_id = self.mlflow_experiment_id):
-                mlflow.log_metric(str(self.scoring), score)
+            mlflow.log_metric(str(self.scoring), score)
+            mlflow.end_run()
 
         return score
 
