@@ -422,12 +422,25 @@ class Optimiser():
 
             if self.mlflow_active:
                 mlflow.start_run(experiment_id=self.mlflow_experiment_id)
-                mlflow.log_params(ne.get_params())
-                mlflow.log_param('cat_encoding', ce.strategy)
+
+                na_params = ne.get_params()
+                for k in na_params.keys():
+                    mlflow.log_param('na__'+k, na_params[k])
+
+                mlflow.log_param('cat__encoding', ce.strategy)
+
                 try:
-                    mlflow.log_params(fs.get_params())
+                    fs_params = fs.get_params()
+                    for k in fs_params.keys():
+                        mlflow.log_param('fs__'+k, fs_params[k])
                 except:
                     pass
+
+                estimator_parms = dict(list(est.get_params().items())
+                         + list(est.get_estimator().get_params().items()))
+                for k in estimator_parms.keys():
+                    mlflow.log_param('est__'+k, estimator_parms[k])
+
 
             try:
 
