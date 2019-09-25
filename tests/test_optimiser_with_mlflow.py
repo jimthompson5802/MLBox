@@ -65,10 +65,5 @@ def test_evaluate_and_optimise_classification_with_mlflow(setup_for_mlflow):
     assert os.path.exists('./mlruns')
     assert os.path.exists('./mlruns/1')
     assert os.path.isfile('./mlruns/1/meta.yaml')
-    print(os.listdir('./mlruns/1'))
     assert len(os.listdir('./mlruns/1')) == 5
 
-    assert type(best) == type(dict)
-
-if __name__ == '__main__':
-    test_evaluate_and_optimise_classification_with_mlflow(setup_for_mlflow)
