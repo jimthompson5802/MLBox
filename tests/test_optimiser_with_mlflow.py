@@ -3,12 +3,13 @@
 # Author: Axel ARONIO DE ROMBLAY <axelderomblay@gmail.com>
 # Author: Henri GERARD <hgerard.pro@gmail.com>
 # License: BSD 3 clause
-"""Test mlbox.optimisation.optimiser module."""
+"""Test mlbox.optimisation.optimiser with mlflow integration module."""
 import pytest
 import numpy as np
 import shutil
 import os.path
 import os
+import pandas as pd
 
 from mlbox.optimisation.optimiser import Optimiser
 from mlbox.preprocessing.drift_thresholder import Drift_thresholder
@@ -19,7 +20,7 @@ from mlbox.optimisation import make_scorer
 @pytest.fixture
 def setup_for_mlflow():
     try:
-        shutil.rmtree('./mlruns')
+        shutil.rmtree('./save')
     except:
         pass
 
@@ -58,12 +59,23 @@ def test_evaluate_and_optimise_classification_with_mlflow(setup_for_mlflow):
 
              }
 
-    mflow_parms = {'tracking_uri' : './mlruns',
-                   'experiment_name' : 'mlfow_pytest_experiment'}
+    best = opt.optimise(space, dict, 4)
 
-    best = opt.optimise(space, dict, 4, mlflow_parms = mflow_parms)
-    assert os.path.exists('./mlruns')
-    assert os.path.exists('./mlruns/1')
-    assert os.path.isfile('./mlruns/1/meta.yaml')
-    assert len(os.listdir('./mlruns/1')) == 5
+    # test for existence of data stored by mflow
+    assert os.path.exists('./save/mlflow_tracking')
+    assert os.path.exists('./save/mlflow_tracking/0')
+    assert os.path.isfile('./save/mlflow_tracking/0/meta.yaml')
+    assert len(os.listdir('./save/mlflow_tracking/0')) == 5
+
+    # create pandas dataframe containing mflow captured data
+    hyp_df = opt.extract_optimise_results()
+
+    assert isinstance(hyp_df, pd.core.frame.DataFrame)
+    assert hyp_df.shape == (4, 36)
+
+    # save pandas dataframe
+    hyp_df.to_csv('./save/mlflow_data.csv', index=False)
+    assert os.path.isfile('./save/mlflow_data.csv')
+
+
 

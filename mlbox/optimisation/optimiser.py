@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 import warnings
 import time
+import os.path
 
 from hyperopt import fmin, hp, tpe
 from sklearn.model_selection import cross_val_score, KFold, StratifiedKFold
@@ -421,7 +422,7 @@ class Optimiser():
                 print("")
 
             if self.mlflow_active:
-                mlflow.start_run(experiment_id=self.mlflow_experiment_id)
+                mlflow.start_run()
 
                 na_params = ne.get_params()
                 for k in na_params.keys():
@@ -489,7 +490,7 @@ class Optimiser():
 
         return score
 
-    def optimise(self, space, df, max_evals=40, mlflow_parms=None):
+    def optimise(self, space, df, max_evals=40):
 
         """Optimises the Pipeline.
 
@@ -603,10 +604,8 @@ class Optimiser():
                             hyper_space[p] = hp.choice(p, space[p]["space"])
 
 
-                if mlflow_parms is not None:
-                    mlflow.set_tracking_uri(mlflow_parms['tracking_uri'])
-                    self.mlflow_experiment_id = mlflow.set_experiment(mlflow_parms['experiment_name'])
-                    self.mlflow_active = True
+                mlflow.set_tracking_uri(os.path.join(self.to_path,'mlflow_tracking'))
+                self.mlflow_active = True
 
                 best_params = fmin(hyperopt_objective,
                                    space=hyper_space,
@@ -634,3 +633,45 @@ class Optimiser():
                     print(best_params)
 
                 return best_params
+
+
+    def extract_optimise_results(self):
+
+        """Creates pandas data frame for results of the optimise run.
+
+
+        Extract from each trial run the hyper-parameter settings and resulting
+        metric.
+
+        Parameters
+        ----------
+            None.
+
+        Returns
+        -------
+        pandas dataframe
+            hyperparameter tuning results
+
+        Examples
+        --------
+        >>> from mlbox.optimisation import *
+        >>> from sklearn.datasets import load_boston
+        >>> #load data
+        >>> dataset = load_boston()
+        >>> #evaluating the pipeline
+        >>> opt = Optimiser()
+        >>> params = {
+        ...     "ne__numerical_strategy" : 0,
+        ...     "ce__strategy" : "label_encoding",
+        ...     "fs__threshold" : 0.1,
+        ...     "stck__base_estimators" : [Regressor(strategy="RandomForest"), Regressor(strategy="ExtraTrees")],
+        ...     "est__strategy" : "Linear"
+        ... }
+        >>> df = {"train" : pd.DataFrame(dataset.data), "target" : pd.Series(dataset.target)}
+        >>> opt.evaluate(params, df)
+        >>> hyp_df = opt.extract_optimise_results()
+        """
+
+        df = mlflow.search_runs(experiment_ids=['0'])
+
+        return df
