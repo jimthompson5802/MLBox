@@ -55,22 +55,21 @@ def test_evaluate_and_optimise_classification_with_mlflow(setup_for_mlflow):
              'fs__threshold': {"search": "uniform",
                                "space": [0.01, 0.3]},
              'est__max_depth': {"search": "choice",
-                                "space": [3, 4, 5, 6, 7]}
+                                "space": [3, 4, 5, 6, 7]},
+             'est__n_estimators': {'search': 'choice',
+                                   'space': [100, 200, 300, 400]}
 
              }
 
     best = opt.optimise(space, dict, 4)
 
     # test for existence of data stored by mflow
-    assert os.path.exists('./save/mlflow_tracking')
-    assert os.path.exists('./save/mlflow_tracking/0')
     assert os.path.isfile('./save/mlflow_tracking/0/meta.yaml')
     assert len(os.listdir('./save/mlflow_tracking/0')) == 5
 
     # create pandas dataframe containing mflow captured data
     hyp_df = opt.extract_optimise_results()
-
-    assert isinstance(hyp_df, pd.core.frame.DataFrame)
+    assert isinstance(hyp_df, pd.DataFrame)
     assert hyp_df.shape == (4, 36)
 
     # save pandas dataframe
