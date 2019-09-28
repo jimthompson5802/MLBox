@@ -605,7 +605,8 @@ class Optimiser():
 
                 if record_experiment is not None:
                     mlflow.set_experiment(record_experiment)
-                    self.mflow_active_experiment_id = mlflow.tracking.fluent._active_experiment_id
+                    self.mlflow_active_experiment_id = mlflow.tracking.fluent._active_experiment_id
+                    self.mlflow_experiments[record_experiment] = self.mlflow_active_experiment_id
 
 
                 best_params = fmin(hyperopt_objective,
