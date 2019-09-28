@@ -672,8 +672,10 @@ class Optimiser():
         >>> hyp_df = opt.extract_optimise_results()
         """
 
+        # create pandas dataframe of mlflow data
         df = mlflow.search_runs(experiment_ids=['0'])
 
+        # convert parameters that can be numeric to numeric
         for c in [c for c in hyp_df if c[:6] == 'params']:
             if df[c].dtype == 'object':
                 try:
