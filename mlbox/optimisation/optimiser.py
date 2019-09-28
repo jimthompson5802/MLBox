@@ -618,6 +618,9 @@ class Optimiser():
                                    algo=tpe.suggest,
                                    max_evals=max_evals)
 
+                if self.mlflow_active:
+                    self.mlflow_active = False
+
                 # Displaying best_params
 
                 for p, v in best_params.items():
