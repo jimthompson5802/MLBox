@@ -490,7 +490,7 @@ class Optimiser():
 
         return score
 
-    def optimise(self, space, df, max_evals=40, record_experiment=None):
+    def optimise(self, space, df, max_evals=40, record_experiment_id=None):
 
         """Optimises the Pipeline.
 
@@ -530,7 +530,7 @@ class Optimiser():
             Number of iterations.
             For an accurate optimal hyper-parameter, max_evals = 40.
 
-        record_experiment : string, default = None
+        record_experiment_id : int, default = None
             Record hyperparameter results under the specified experiment name
 
 
