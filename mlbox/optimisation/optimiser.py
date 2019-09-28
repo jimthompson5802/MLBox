@@ -674,4 +674,17 @@ class Optimiser():
 
         df = mlflow.search_runs(experiment_ids=['0'])
 
+        for c in [c for c in hyp_df if c[:6] == 'params']:
+            if df[c].dtype == 'object':
+                try:
+                    df[c] = df[c].astype('int')
+                except:
+                    pass
+
+            if df[c].dtype == 'object':
+                try:
+                    df[c] = df[c].astype('float')
+                except:
+                    pass
+
         return df
