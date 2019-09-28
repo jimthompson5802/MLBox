@@ -674,7 +674,7 @@ class Optimiser():
         """
 
         # create pandas dataframe of mlflow data
-        df = mlflow.search_runs(experiment_ids=['0'])
+        df = mlflow.search_runs()
 
         # convert parameters that can be numeric to numeric
         for c in [c for c in df.columns if c[:6] == 'params']:
