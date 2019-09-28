@@ -71,7 +71,8 @@ class Optimiser():
         self.random_state = random_state
         self.to_path = to_path
         self.verbose = verbose
-        self.mlflow_active = False
+        self.mflow_active_experiment_id = 0
+        self.mlflow_experiments = {}  #mapping experiment name to experiment_id
 
         warnings.warn("Optimiser will save all your fitted models into directory '"
                       +str(self.to_path)+"/joblib'. Please clear it regularly.")
@@ -606,8 +607,8 @@ class Optimiser():
 
                 if record_experiment is not None:
                     mlflow.set_experiment(record_experiment)
-                    self.mlflow_active = True
                     self.mflow_active_experiment_id = mlflow.tracking.fluent._active_experiment_id
+
 
                 best_params = fmin(hyperopt_objective,
                                    space=hyper_space,
@@ -637,7 +638,7 @@ class Optimiser():
                 return best_params
 
 
-    def extract_optimise_results(self):
+    def extract_optimise_results(self, experiment_name=None):
 
         """Creates pandas data frame for results of the optimise run.
 
@@ -675,7 +676,8 @@ class Optimiser():
         """
 
         # create pandas dataframe of mlflow data
-        df = mlflow.search_runs()
+        experiment_id_to_extract = 0 if experiment_name is None else self.mlflow_experiments[experiment_name]
+        df = mlflow.search_runs(experiment_ids=[experiment_id_to_extract])
 
         # convert parameters that can be numeric to numeric
         for c in [c for c in df.columns if c[:6] == 'params']:
