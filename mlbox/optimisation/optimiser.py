@@ -71,6 +71,7 @@ class Optimiser():
         self.random_state = random_state
         self.to_path = to_path
         self.verbose = verbose
+        self.mlflow_active = False
         self.mflow_active_experiment_id = 0
         self.mlflow_experiments = {}  #mapping experiment name to experiment_id
 
@@ -422,25 +423,26 @@ class Optimiser():
                 ))
                 print("")
 
-            mlflow.start_run()
+            if self.mlflow_active:
+                mlflow.start_run()
 
-            na_params = ne.get_params()
-            for k in na_params.keys():
-                mlflow.log_param('na__'+k, na_params[k])
+                na_params = ne.get_params()
+                for k in na_params.keys():
+                    mlflow.log_param('na__'+k, na_params[k])
 
-            mlflow.log_param('cat__encoding', ce.strategy)
+                mlflow.log_param('cat__encoding', ce.strategy)
 
-            try:
-                fs_params = fs.get_params()
-                for k in fs_params.keys():
-                    mlflow.log_param('fs__'+k, fs_params[k])
-            except:
-                pass
+                try:
+                    fs_params = fs.get_params()
+                    for k in fs_params.keys():
+                        mlflow.log_param('fs__'+k, fs_params[k])
+                except:
+                    pass
 
-            estimator_parms = dict(list(est.get_params().items())
-                     + list(est.get_estimator().get_params().items()))
-            for k in estimator_parms.keys():
-                mlflow.log_param('est__'+k, estimator_parms[k])
+                estimator_parms = dict(list(est.get_params().items())
+                         + list(est.get_estimator().get_params().items()))
+                for k in estimator_parms.keys():
+                    mlflow.log_param('est__'+k, estimator_parms[k])
 
 
             try:
@@ -484,8 +486,9 @@ class Optimiser():
             print("CPU time: %s seconds" % (time.time() - start_time))
             print("")
 
-        mlflow.log_metric(str(self.scoring), score)
-        mlflow.end_run()
+        if self.mlflow_active:
+            mlflow.log_metric(str(self.scoring), score)
+            mlflow.end_run()
 
         return score
 
@@ -607,6 +610,7 @@ class Optimiser():
                     mlflow.set_experiment(record_experiment)
                     self.mlflow_active_experiment_id = mlflow.tracking.fluent._active_experiment_id
                     self.mlflow_experiments[record_experiment] = self.mlflow_active_experiment_id
+                    self.mlflow_active = True
 
 
                 best_params = fmin(hyperopt_objective,
