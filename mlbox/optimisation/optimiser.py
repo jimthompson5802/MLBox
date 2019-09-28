@@ -490,7 +490,7 @@ class Optimiser():
 
         return score
 
-    def optimise(self, space, df, max_evals=40, capture_results_as_experiment=None):
+    def optimise(self, space, df, max_evals=40, record_experiment=None):
 
         """Optimises the Pipeline.
 
@@ -530,7 +530,7 @@ class Optimiser():
             Number of iterations.
             For an accurate optimal hyper-parameter, max_evals = 40.
 
-        capture_results_as_experiment : string, default = None
+        record_experiment : string, default = None
             Record hyperparameter results under the specified experiment name
 
 
@@ -604,9 +604,10 @@ class Optimiser():
 
 
 
-                if capture_results_as_experiment is not None:
-                    mlflow.set_experiment(capture_results_as_experiment)
+                if record_experiment is not None:
+                    mlflow.set_experiment(record_experiment)
                     self.mlflow_active = True
+                    self.mflow_active_experiment_id = mlfow.tracking.fluent._active_experiment_id
 
                 best_params = fmin(hyperopt_objective,
                                    space=hyper_space,
