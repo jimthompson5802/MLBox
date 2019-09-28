@@ -677,6 +677,7 @@ class Optimiser():
 
         # convert parameters that can be numeric to numeric
         for c in [c for c in df.columns if c[:6] == 'params']:
+
             if df[c].dtype == 'object':
                 try:
                     df[c] = df[c].astype('int')
