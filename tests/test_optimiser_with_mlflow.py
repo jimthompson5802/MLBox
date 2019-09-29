@@ -10,6 +10,7 @@ import shutil
 import os.path
 import os
 import pandas as pd
+import re
 
 from mlbox.optimisation.optimiser import Optimiser
 from mlbox.preprocessing.drift_thresholder import Drift_thresholder
@@ -20,7 +21,7 @@ from mlbox.optimisation import make_scorer
 @pytest.fixture
 def setup_for_mlflow():
     try:
-        shutil.rmtree('./save')
+        shutil.rmtree('./mlruns')
     except:
         pass
 
@@ -55,26 +56,35 @@ def test_evaluate_and_optimise_classification_with_mlflow(setup_for_mlflow):
              'fs__threshold': {"search": "uniform",
                                "space": [0.01, 0.3]},
              'est__max_depth': {"search": "choice",
-                                "space": [3, 4, 5, 6, 7]},
+                                "space": [3, 4, 5]},
              'est__n_estimators': {'search': 'choice',
-                                   'space': [100, 200, 300, 400]}
+                                   'space': [100, 200]}
 
              }
 
     best = opt.optimise(space, dict, 4)
+    assert not os.path.isdir('./mlruns')
 
+    # create first experiment
+    best = opt.optimise(space, dict, 4, record_experiment = 'MyExperiment')
     # test for existence of data stored by mflow
-    assert os.path.isfile('./save/mlflow_tracking/0/meta.yaml')
-    assert len(os.listdir('./save/mlflow_tracking/0')) == 5
+    assert os.path.isfile('./mlruns/1/meta.yaml')
+    with open('./mlruns/1/meta.yaml', 'r') as f:
+        buffer = f.read()
+    assert re.search('\nname: MyExperiment', buffer) is not None
+    assert len(os.listdir('./mlruns/1')) == 5
 
     # create pandas dataframe containing mflow captured data
-    hyp_df = opt.extract_optimise_results()
+    hyp_df = opt.extract_optimise_results(experiment_name = 'MyExperiment')
     assert isinstance(hyp_df, pd.DataFrame)
     assert hyp_df.shape == (4, 36)
 
-    # save pandas dataframe
-    hyp_df.to_csv('./save/mlflow_data.csv', index=False)
-    assert os.path.isfile('./save/mlflow_data.csv')
-
+    # create second experiment
+    best = opt.optimise(space, dict, 4, record_experiment = 'MyExperiment2')
+    # test for existence of data stored by mflow
+    with open('./mlruns/2/meta.yaml', 'r') as f:
+        buffer = f.read()
+    assert re.search('\nname: MyExperiment2', buffer) is not None
+    assert len(os.listdir('./mlruns/2')) == 5
 
 
