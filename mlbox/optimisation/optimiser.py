@@ -654,7 +654,10 @@ class Optimiser():
 
         Parameters
         ----------
-            None.
+        experiment_name : string, default=None
+            Specifies experiment name to extract hyperparameter tuning results.  Experiment name must have been specified
+            on a prior optimise() run.
+
 
         Returns
         -------
