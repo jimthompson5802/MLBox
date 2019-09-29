@@ -58,12 +58,13 @@ def test_evaluate_and_optimise_classification_with_mlflow(setup_for_mlflow):
              'est__max_depth': {"search": "choice",
                                 "space": [3, 4, 5]},
              'est__n_estimators': {'search': 'choice',
-                                   'space': [100, 200]}
+                                   'space': [25, 50]}
 
              }
 
     best = opt.optimise(space, dict, 4)
     assert not os.path.isdir('./mlruns')
+    assert len(opt.mlflow_experiments) == 0
 
     # create first experiment
     best = opt.optimise(space, dict, 4, record_experiment = 'MyExperiment')
@@ -73,6 +74,7 @@ def test_evaluate_and_optimise_classification_with_mlflow(setup_for_mlflow):
         buffer = f.read()
     assert re.search('\nname: MyExperiment', buffer) is not None
     assert len(os.listdir('./mlruns/1')) == 5
+    assert len(opt.mlflow_experiments) == 1
 
     # create pandas dataframe containing mflow captured data
     hyp_df = opt.extract_optimise_results(experiment_name = 'MyExperiment')
@@ -86,5 +88,10 @@ def test_evaluate_and_optimise_classification_with_mlflow(setup_for_mlflow):
         buffer = f.read()
     assert re.search('\nname: MyExperiment2', buffer) is not None
     assert len(os.listdir('./mlruns/2')) == 5
+    assert len(opt.mlflow_experiments) == 2
+
+    # create new optimiser and see if it picks up the prior data
+    opt2 = Optimiser(scoring='accuracy', n_folds=3)
+    assert len(opt2.mlflow_experiments) == 2
 
 
