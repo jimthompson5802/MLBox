@@ -79,9 +79,10 @@ class Optimiser():
         self.mflow_active_experiment_id = 0
         self.mlflow_experiments = {}
 
-        # initialize with prior mlflow experiment data if it exists
+        # initialize with prior mlflow experiment data if it existsK
         # determine if old mlflow experiment data exists
         mlrun_dir = urllib.parse.urlparse(mlflow.get_tracking_uri()).path
+        print(mlrun_dir)
         if os.path.isdir(mlrun_dir):
             for d in [dir for dir in os.listdir(mlrun_dir) if dir > '0']:
                 with open(os.path.join(mlrun_dir, d, 'meta.yaml'), 'r') as f:
