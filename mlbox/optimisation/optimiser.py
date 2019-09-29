@@ -82,13 +82,12 @@ class Optimiser():
         # initialize with prior mlflow experiment data if it existsK
         # determine if old mlflow experiment data exists
         mlrun_dir = urllib.parse.urlparse(mlflow.get_tracking_uri()).path
-        print(mlrun_dir)
         if os.path.isdir(mlrun_dir):
             for d in [dir for dir in os.listdir(mlrun_dir) if dir > '0']:
                 with open(os.path.join(mlrun_dir, d, 'meta.yaml'), 'r') as f:
                     meta_data = f.read()
                 m = re.search('\nname: [a-zA-Z0-9]*', meta_data)
-                self.mlflow_experiments[str.split(m[1])] = d
+                self.mlflow_experiments[str.split(m[0])[1]] = d
 
         warnings.warn("Optimiser will save all your fitted models into directory '"
                       +str(self.to_path)+"/joblib'. Please clear it regularly.")
