@@ -7,6 +7,8 @@ import pandas as pd
 import warnings
 import time
 import os.path
+import urllib
+import re
 
 from hyperopt import fmin, hp, tpe
 from sklearn.model_selection import cross_val_score, KFold, StratifiedKFold
@@ -71,9 +73,21 @@ class Optimiser():
         self.random_state = random_state
         self.to_path = to_path
         self.verbose = verbose
+
+        # initalize mlflow related constructs
         self.mlflow_active = False
         self.mflow_active_experiment_id = 0
-        self.mlflow_experiments = {}  #mapping experiment name to experiment_id
+        self.mlflow_experiments = {}
+
+        # initialize with prior mlflow experiment data if it exists
+        # determine if old mlflow experiment data exists
+        mlrun_dir = urllib.parse.urlparse(mlflow.get_tracking_uri()).path
+        if os.path.isdir(mlrun_dir):
+            for d in [dir for dir in os.listdir(mlrun_dir) if dir > '0']:
+                with open(os.path.join(mlrun_dir, d, 'meta.yaml'), 'r') as f:
+                    meta_data = f.read()
+                m = re.search('\nname: [a-zA-Z0-9]*', meta_data)
+                self.mlflow_experiments[str.split(m[1])] = d
 
         warnings.warn("Optimiser will save all your fitted models into directory '"
                       +str(self.to_path)+"/joblib'. Please clear it regularly.")
