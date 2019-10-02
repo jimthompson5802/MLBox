@@ -78,6 +78,8 @@ class Optimiser():
         self.mlflow_active = False
         self.mflow_active_experiment_id = 0
         self.mlflow_experiments = {}
+        self.mlflow_best_run_id = None
+        self.mlflow_best_score = np.inf
 
         # initialize with prior mlflow experiment data if it existsK
         # determine if old mlflow experiment data exists
@@ -502,6 +504,9 @@ class Optimiser():
 
         if self.mlflow_active:
             mlflow.log_metric(str(self.scoring), score)
+            if score < self.mlflow_best_score:
+                self.mlflow_best_score = score
+                self.mlflow_best_run_id = mlflow.active_run.info.run_id
             mlflow.end_run()
 
         return score
@@ -625,6 +630,8 @@ class Optimiser():
                     self.mlflow_active_experiment_id = mlflow.tracking.fluent._active_experiment_id
                     self.mlflow_experiments[record_experiment] = self.mlflow_active_experiment_id
                     self.mlflow_active = True
+                    self.mlflow_best_run_id = None
+                    self.mlflow_best_score = np.inf
 
 
                 best_params = fmin(hyperopt_objective,
@@ -633,6 +640,8 @@ class Optimiser():
                                    max_evals=max_evals)
 
                 if self.mlflow_active:
+                    with mlflow.start_run(run_id=self.mlflow_best_run_id) as run:
+                        mlflow.set_tag('BestRun','True')
                     self.mlflow_active = False
 
                 # Displaying best_params
