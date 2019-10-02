@@ -506,7 +506,7 @@ class Optimiser():
             mlflow.log_metric(str(self.scoring), score)
             if score < self.mlflow_best_score:
                 self.mlflow_best_score = score
-                self.mlflow_best_run_id = mlflow.active_run.info.run_id
+                self.mlflow_best_run_id = mlflow.active_run().info.run_id
             mlflow.end_run()
 
         return score
