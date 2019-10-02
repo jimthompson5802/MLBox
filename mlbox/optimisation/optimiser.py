@@ -79,7 +79,7 @@ class Optimiser():
         self.mflow_active_experiment_id = 0
         self.mlflow_experiments = {}
         self.mlflow_best_run_id = None
-        self.mlflow_best_score = np.inf
+        self.mlflow_best_score = -np.inf
 
         # initialize with prior mlflow experiment data if it existsK
         # determine if old mlflow experiment data exists
@@ -504,7 +504,7 @@ class Optimiser():
 
         if self.mlflow_active:
             mlflow.log_metric(str(self.scoring), score)
-            if score < self.mlflow_best_score:
+            if score > self.mlflow_best_score:
                 self.mlflow_best_score = score
                 self.mlflow_best_run_id = mlflow.active_run().info.run_id
             mlflow.end_run()
