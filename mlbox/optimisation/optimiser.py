@@ -631,7 +631,7 @@ class Optimiser():
                     self.mlflow_experiments[record_experiment] = self.mlflow_active_experiment_id
                     self.mlflow_active = True
                     self.mlflow_best_run_id = None
-                    self.mlflow_best_score = np.inf
+                    self.mlflow_best_score = -np.inf
 
 
                 best_params = fmin(hyperopt_objective,
