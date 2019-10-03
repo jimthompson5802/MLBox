@@ -507,6 +507,7 @@ class Optimiser():
             if score > self.mlflow_best_score:
                 self.mlflow_best_score = score
                 self.mlflow_best_run_id = mlflow.active_run().info.run_id
+                print("recording as best run", self.mlflow_best_run_id, ", score ", self.mlflow_best_score)
             mlflow.end_run()
 
         return score
@@ -641,6 +642,7 @@ class Optimiser():
 
                 if self.mlflow_active:
                     with mlflow.start_run(run_id=self.mlflow_best_run_id) as run:
+                        print('setting as best run', self.mlflow_best_run_id)
                         mlflow.set_tag('BestRun','True')
                     self.mlflow_active = False
 
