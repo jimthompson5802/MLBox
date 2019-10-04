@@ -506,7 +506,9 @@ class Optimiser():
             mlflow.log_metric(str(self.scoring), score)
             if score > self.mlflow_best_score:
                 self.mlflow_best_score = score
-                self.mlflow_best_run_id = mlflow.active_run().info.run_id
+                self.mlflow_best_run_id = [mlflow.active_run().info.run_id]
+            elif np.close(score, self.mlflow_best_score):
+                self.mlflow_best_run_id.append(mlflow.active_run().info.run_id)
 
             mlflow.end_run()
 
@@ -641,8 +643,9 @@ class Optimiser():
                                    max_evals=max_evals)
 
                 if self.mlflow_active:
-                    with mlflow.start_run(run_id=self.mlflow_best_run_id) as run:
-                        mlflow.set_tag('BestRun','True')
+                    for r in self.mlflow_best_run_id:
+                        with mlflow.start_run(run_id=r) as run:
+                            mlflow.set_tag('BestRun','True')
                     self.mlflow_active = False
 
                 # Displaying best_params
