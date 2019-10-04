@@ -507,7 +507,7 @@ class Optimiser():
             if score > self.mlflow_best_score:
                 self.mlflow_best_score = score
                 self.mlflow_best_run_id = [mlflow.active_run().info.run_id]
-            elif np.close(score, self.mlflow_best_score):
+            elif np.isclose(score, self.mlflow_best_score):
                 self.mlflow_best_run_id.append(mlflow.active_run().info.run_id)
 
             mlflow.end_run()
