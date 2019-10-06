@@ -85,7 +85,7 @@ class Optimiser():
         # determine if old mlflow experiment data exists
         mlrun_dir = urllib.parse.urlparse(mlflow.get_tracking_uri()).path
         if os.path.isdir(mlrun_dir):
-            for d in [dir for dir in os.listdir(mlrun_dir) if d >= '0']:
+            for d in [dir for dir in os.listdir(mlrun_dir) if dir >= '0']:
                 with open(os.path.join(mlrun_dir, d, 'meta.yaml'), 'r') as f:
                     meta_data = f.read()
                 m = re.search('\nname: [a-zA-Z0-9]*', meta_data)
