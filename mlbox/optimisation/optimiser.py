@@ -442,9 +442,9 @@ class Optimiser():
             if self.mlflow_active:
                 mlflow.start_run()
 
-                na_params = ne.get_params()
-                for k in na_params.keys():
-                    mlflow.log_param('na__'+k, na_params[k])
+                ne_params = ne.get_params()
+                for k in ne_params.keys():
+                    mlflow.log_param('ne__'+k, ne_params[k])
 
                 mlflow.log_param('cat__encoding', ce.strategy)
 
