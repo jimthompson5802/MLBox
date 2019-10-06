@@ -446,7 +446,7 @@ class Optimiser():
                 for k in ne_params.keys():
                     mlflow.log_param('ne__'+k, ne_params[k])
 
-                mlflow.log_param('cat__encoding', ce.strategy)
+                mlflow.log_param('ce__strategy', ce.strategy)
 
                 try:
                     fs_params = fs.get_params()
